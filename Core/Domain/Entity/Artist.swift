@@ -1,15 +1,15 @@
 import Foundation
 
 public struct Artist: Identifiable, Equatable, Hashable {
-    public let id: MusicItemID
+    public let id: EntityID
     public let name: String
     public let artworkURL: URL?
-    public let albumIDs: [MusicItemID]
+    public let albumIDs: [EntityID]
 
-    public init(id: MusicItemID,
+    public init(id: EntityID,
                 name: String,
                 artworkURL: URL?,
-                albumIDs: [MusicItemID]) {
+                albumIDs: [EntityID]) {
         self.id = id
         self.name = name
         self.artworkURL = artworkURL

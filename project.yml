@@ -1,0 +1,39 @@
+name: Cue
+options:
+  bundleIdPrefix: fedor.ryzhenkov
+  deploymentTarget:
+    macOS: "14.0"
+targets:
+  Cue:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+      - path: Core
+      - path: Features
+    resources:
+      - path: Resources 
+    capabilities:
+      appSandbox: true
+      appleMusic: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).Cue
+        MACOSX_DEPLOYMENT_TARGET: $(inherited)
+        MACOSX_DEPLOYMENT_TARGET: 14.0
+        GENERATE_INFOPLIST_FILE: YES
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+        Release: {}
+  CueTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Tests/Unit]
+    dependencies:
+      - target: Cue
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(bundleIdPrefix).CueTests
+        MACOSX_DEPLOYMENT_TARGET: $(inherited)
+        MACOSX_DEPLOYMENT_TARGET: 14.0

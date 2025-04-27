@@ -6,9 +6,10 @@ public final class AppleMusicLibraryRepository: MusicLibraryRepository {
     public init() {}
 
     // MARK: - MusicLibraryRepository
+
+    @available(macOS 14.0, *)
     public func library() async throws -> MusicLibrarySnapshot {
-        // 1. Request user permission if needed
-        switch await MusicAuthorization.currentStatus {
+        switch MusicAuthorization.currentStatus {
         case .notDetermined:
             let status = await MusicAuthorization.request()
             guard status == .authorized else { throw MusicAuthorizationError.notAuthorized }
@@ -19,7 +20,6 @@ public final class AppleMusicLibraryRepository: MusicLibraryRepository {
             throw MusicAuthorizationError.unknown
         }
 
-        // 2. Fetch songs, albums, artists concurrently
         async let songsResponse = fetchSongs()
         async let albumsResponse = fetchAlbums()
         async let artistsResponse = fetchArtists()
@@ -28,17 +28,28 @@ public final class AppleMusicLibraryRepository: MusicLibraryRepository {
         return .init(songs: songs, albums: albums, artists: artists)
     }
 
+    @available(macOS 14.0, *)
     public func play(track: Song) async throws {
         let player = ApplicationMusicPlayer.shared
-        let musicID = MusicItemID(track.id)
-        let musicItem = MusicKit.Song(id: musicID)
-        try await player.queue = [musicItem]
+ 
+        let request  = MusicCatalogResourceRequest<MusicKit.Song>(
+                         matching: \.id,
+                         equalTo : MusicKit.MusicItemID(track.id))
+
+        let response = try await request.response()
+        guard let musicKitSong = response.items.first else {
+            throw MusicAuthorizationError.unknown
+        }
+
+        player.queue = ApplicationMusicPlayer.Queue(for: [musicKitSong])
+
         try await player.play()
     }
 }
 
 // MARK: - Helpers
 
+@available(macOS 14.0, *)
 private extension AppleMusicLibraryRepository {
     func fetchSongs() async throws -> [Song] {
         let request = MusicLibraryRequest<MusicKit.Song>()
@@ -62,12 +73,15 @@ private extension AppleMusicLibraryRepository {
 // MARK: - Mapping Extensions
 
 private extension Song {
+    @available(macOS 14.0, *)
     init(musicSong: MusicKit.Song) {
+        let albumID = ""
+
         self.init(
             id: musicSong.id.rawValue,
             title: musicSong.title,
             artistName: musicSong.artistName,
-            albumId: musicSong.album?.id.rawValue ?? "",
+            albumId: albumID,
             duration: musicSong.duration ?? 0,
             artworkURL: musicSong.artwork?.url(width: 200, height: 200)
         )
@@ -75,24 +89,27 @@ private extension Song {
 }
 
 private extension Album {
+
+    @available(macOS 14.0, *)
     init(musicAlbum: MusicKit.Album) {
         self.init(
             id: musicAlbum.id.rawValue,
             title: musicAlbum.title,
             artistName: musicAlbum.artistName,
             artworkURL: musicAlbum.artwork?.url(width: 400, height: 400),
-            songIDs: []
+            songIDs: [] // Placeholder - requires fetching album.tracks relationship
         )
     }
 }
 
 private extension Artist {
+    @available(macOS 14.0, *)
     init(musicArtist: MusicKit.Artist) {
         self.init(
             id: musicArtist.id.rawValue,
             name: musicArtist.name,
             artworkURL: musicArtist.artwork?.url(width: 400, height: 400),
-            albumIDs: []
+            albumIDs: [] // Placeholder - requires fetching artist.albums relationship
         )
     }
 }

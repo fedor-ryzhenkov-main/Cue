@@ -1,17 +1,17 @@
 import Foundation
 
 public struct Song: Identifiable, Equatable, Hashable {
-    public let id: MusicItemID
+    public let id: EntityID
     public let title: String
     public let artistName: String
-    public let albumId: MusicItemID
+    public let albumId: EntityID
     public let duration: TimeInterval
     public let artworkURL: URL?
 
-    public init(id: MusicItemID,
+    public init(id: EntityID,
                 title: String,
                 artistName: String,
-                albumId: MusicItemID,
+                albumId: EntityID,
                 duration: TimeInterval,
                 artworkURL: URL?) {
         self.id = id

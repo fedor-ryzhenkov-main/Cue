@@ -5,6 +5,7 @@ public struct PlayTrackUseCase {
         self.repository = repository
     }
 
+    @available(macOS 14.0, *)
     public func callAsFunction(track: Song) async throws {
         try await repository.play(track: track)
     }

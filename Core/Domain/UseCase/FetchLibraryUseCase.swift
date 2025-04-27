@@ -5,6 +5,7 @@ public struct FetchLibraryUseCase {
         self.repository = repository
     }
 
+    @available(macOS 14.0, *)
     public func callAsFunction() async throws -> MusicLibrarySnapshot {
         try await repository.library()
     }
